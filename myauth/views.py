@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from rest_framework.response import Response
 
 @api_view(['POST'])
-def create_user(request):
+def sign_up(request):
     return JsonResponse(
         User.objects.create_user(
             username=request.POST['email'],
