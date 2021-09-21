@@ -18,6 +18,9 @@ case $1 in
    mm-all)
       $head makemigrations course user
       ;;
+   custom)
+      $head "${@:2}"
+      ;;
    rm-mm-all)
       echo Are you sure you want to remove all migrations?? [Y/n]
       read answer

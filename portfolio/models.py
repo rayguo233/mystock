@@ -15,8 +15,13 @@ class Transaction(ModelWithTime):
     currency = models.CharField(max_length=20)
     total_cost = models.DecimalField(max_digits=20, decimal_places=6)
     transaction_fee = models.DecimalField(max_digits=10, decimal_places=6)
+    transaction_date = models.DateTimeField()
 
-class Portfolio(ModelWithTime):
+class Holding(ModelWithTime):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     ticker = models.CharField(max_length=20)
-    curr_num_shares = models.IntegerField()
+    num_shares = models.IntegerField()
+    total_cost = models.DecimalField(max_digits=20, decimal_places=6)
+
+    class Meta:
+        unique_together = ['user', 'ticker']
