@@ -5,3 +5,4 @@ migrations
 .vscode
 dev_settings.py
 prod_settings.py
+raw_data
