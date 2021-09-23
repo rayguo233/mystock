@@ -17,6 +17,9 @@ class Transaction(ModelWithTime):
     transaction_fee = models.DecimalField(max_digits=10, decimal_places=6)
     transaction_time = models.DateTimeField()
 
+    class Meta:
+        unique_together = ['user', 'transaction_time']
+
 class Holding(ModelWithTime):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     ticker = models.CharField(max_length=20)

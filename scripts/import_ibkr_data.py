@@ -7,7 +7,7 @@ import pytz
 from portfolio.models import Transaction
 
 
-def get_start_n_end(lines: list, start_str: str) -> tuple():
+def get_start_n_end(lines: list[str], start_str: str) -> tuple[int, int]:
     first_line_num = None
     for i, line in enumerate(lines, start=1):
         if first_line_num and not line.startswith(start_str):
@@ -29,7 +29,7 @@ user = User.objects.get(pk=1)
 for index, row in df.iterrows():
     dt = datetime.strptime(row['Date/Time'], '%Y-%m-%d, %H:%M:%S')
     dt = dt.replace(tzinfo=pytz.timezone('America/New_York'))
-    Transaction.objects.create(
+    Transaction.objects.get_or_create(
         user=user, ticker=row['Symbol'],
         num_shares=int(row['Quantity']),
         currency=row['Currency'], 
