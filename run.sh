@@ -18,6 +18,9 @@ case $1 in
    mm-all)
       $head makemigrations course user
       ;;
+   shell)
+      $head shell "${@:2}"
+      ;;
    custom)
       $head "${@:2}"
       ;;
