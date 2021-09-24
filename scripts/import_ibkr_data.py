@@ -4,7 +4,7 @@ import pandas as pd
 from django.contrib.auth.models import User
 from decimal import Decimal
 import pytz
-from portfolio.models import Transaction
+from portfolio.models import Holding, Transaction
 
 
 def get_start_n_end(lines: list[str], start_str: str) -> tuple[int, int]:
@@ -35,12 +35,18 @@ user = User.objects.get(pk=1)
 for index, row in df.iterrows():
     dt = datetime.strptime(row['Date/Time'], '%Y-%m-%d, %H:%M:%S')
     dt = pytz.timezone('America/New_York').localize(dt)
-    t = Transaction.objects.get_or_create(
+    t, created = Transaction.objects.get_or_create(
         user=user, 
         ticker=row['Symbol'],
         num_shares=int(row['Quantity']),
         currency=row['Currency'], 
         total_cost=round(- Decimal(row['Proceeds']) - Decimal(row['Comm/Fee']), 6),  # round to 6 digits after decimal point
         transaction_fee=round(- Decimal(row['Comm/Fee']), 6),
-        transaction_time=dt)[0]
+        transaction_time=dt)
+    if created:
+        holding = Holding.objects.get_or_create(user=user, ticker=t.ticker, 
+            defaults={'num_shares': 0, 'total_cost': 0})[0]
+        holding.num_shares += t.num_shares
+        holding.total_cost += t.total_cost
+        holding.save()
     print(t.__dict__)
