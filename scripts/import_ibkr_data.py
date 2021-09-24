@@ -16,24 +16,31 @@ def get_start_n_end(lines: list[str], start_str: str) -> tuple[int, int]:
             first_line_num = i
     return first_line_num, len(lines)
 
-FILE_PATH = "raw_data/ikbr_20201201_20210920.csv"
+def process_stock_trade_csv(raw_file_name: str):
+    read_csv_file = open(f'{raw_file_name}.csv')
+    lines = read_csv_file.readlines()
+    read_csv_file.close()
+    write_csv_file = open(f'{raw_file_name}_processed.csv', "w")
+    for line in lines:
+        if line.startswith('Trades,Header') or line.startswith('Trades,Data'):
+            write_csv_file.write(line)
+    write_csv_file.close()
 
-csv_file = open(FILE_PATH)
-lines = csv_file.readlines()
-csv_file.close()
-start, end = get_start_n_end(lines, "Trades,")
-print(start, end)
-df = pd.read_csv(FILE_PATH, skiprows=start - 1, nrows=end - start)
+FILE_NAME = "raw_data/ikbr_20201201_20210923"
+
+process_stock_trade_csv(FILE_NAME)
+df = pd.read_csv(f'{FILE_NAME}_processed.csv')
 df = df.loc[df['Header']=='Data']
 user = User.objects.get(pk=1)
 for index, row in df.iterrows():
     dt = datetime.strptime(row['Date/Time'], '%Y-%m-%d, %H:%M:%S')
-    dt = dt.replace(tzinfo=pytz.timezone('America/New_York'))
-    Transaction.objects.get_or_create(
-        user=user, ticker=row['Symbol'],
+    dt = pytz.timezone('America/New_York').localize(dt)
+    t = Transaction.objects.get_or_create(
+        user=user, 
+        ticker=row['Symbol'],
         num_shares=int(row['Quantity']),
         currency=row['Currency'], 
-        total_cost= - Decimal(row['Proceeds']) - Decimal(row['Comm/Fee']),
-        transaction_fee= - Decimal(row['Comm/Fee']),
-        transaction_time=dt)
-    break
+        total_cost=round(- Decimal(row['Proceeds']) - Decimal(row['Comm/Fee']), 6),  # round to 6 digits after decimal point
+        transaction_fee=round(- Decimal(row['Comm/Fee']), 6),
+        transaction_time=dt)[0]
+    print(t.__dict__)
