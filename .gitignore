@@ -6,3 +6,4 @@ migrations
 dev_settings.py
 prod_settings.py
 raw_data
+try.py
