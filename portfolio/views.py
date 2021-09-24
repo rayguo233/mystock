@@ -22,16 +22,12 @@ class TransactionViewSet(viewsets.ModelViewSet):
     def create(self, request):
         serializer = TransactionSerializer(data=request.data)
         if serializer.is_valid():
-            transaction = Transaction.objects.create(user=request.user, **serializer.validated_data)
-            try:
-                holding = Holding.objects.filter(user=request.user, ticker=transaction.ticker)[0]
-            except IndexError:
-                holding = Holding.objects.create(user=request.user, ticker=transaction.ticker, 
-                    num_shares=transaction.num_shares, total_cost=transaction.total_cost)
-            else:
-                holding.num_shares += transaction.num_shares
-                holding.total_cost += transaction.total_cost
-                holding.save()
+            transaction = Transaction.objects.get_or_create(user=request.user, **serializer.validated_data)[0]
+            holding = Holding.objects.get_or_create(user=request.user, ticker=transaction.ticker, 
+                default={'num_shares': 0, 'total_cost': 0})[0]
+            holding.num_shares += transaction.num_shares
+            holding.total_cost += transaction.total_cost
+            holding.save()
             return Response({'status': 'success'})
         return Response(serializer.errors,
                         status=status.HTTP_400_BAD_REQUEST)
