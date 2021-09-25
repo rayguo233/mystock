@@ -1,12 +1,13 @@
+import finnhub
 from rest_framework.decorators import action
 from portfolio.serializers import TransactionSerializer, HoldingSerializer
-from portfolio.models import Transaction, Holding
+from portfolio.models import DepositAndWithdrawal, Transaction, Holding
 from rest_framework.response import Response
 from rest_framework import permissions
 from rest_framework import viewsets
 from rest_framework import status
-import requests
 from decimal import Decimal
+from secrets import FINNHUB_API_KEY
 
 
 class TransactionViewSet(viewsets.ModelViewSet):
@@ -47,15 +48,23 @@ class HoldingViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=False, url_path='get-profit', url_name='get_profit')
     def get_profit(self, request):
-        queryset = self.get_queryset()
-        profit = {}
         total_profit = 0
-        for holding in queryset:
-            url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={holding.ticker}&apikey=J1HPLK5KK39B2PTS'
-            data = requests.get(url).json()
-            data = list(data['Time Series (Daily)'].items())
-            cost = holding.total_cost
-            curr_value = Decimal(data[0][1]['5. adjusted close']) * holding.num_shares
-            profit[holding.ticker] = curr_value - cost
-            total_profit += curr_value - cost
-        return Response({'profit': profit, 'total_profit': total_profit})
+        holdings = self.get_queryset()
+        curr_assets = 0
+        for holding in holdings:
+            if holding.num_shares == 0:
+                continue
+            print('--------------------')
+            print(holding.ticker)
+            finnhub_client = finnhub.Client(api_key=FINNHUB_API_KEY)
+            curr_value = Decimal(finnhub_client.quote(holding.ticker)['c']) * holding.num_shares
+            curr_assets += curr_value
+        total_deposits = 0
+        for deposit in DepositAndWithdrawal.objects.all():
+            total_deposits += deposit.amount
+        total_profit = curr_assets - total_deposits
+        return Response({
+            'total_profit': total_profit, 
+            'profit_percentage': total_profit / total_deposits
+        })
+
