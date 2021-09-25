@@ -20,6 +20,15 @@ class Transaction(ModelWithTime):
     class Meta:
         unique_together = ['user', 'transaction_time']
 
+
+class DepositAndWithdrawal(ModelWithTime):
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    currency = models.CharField(max_length=20)
+    amount = models.DecimalField(max_digits=20, decimal_places=6)
+    transaction_fee = models.DecimalField(max_digits=10, decimal_places=6)
+    transaction_time = models.DateTimeField()
+
+
 class Holding(ModelWithTime):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     ticker = models.CharField(max_length=20)
