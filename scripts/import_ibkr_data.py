@@ -4,7 +4,7 @@ import pandas as pd
 from django.contrib.auth.models import User
 from decimal import Decimal
 import pytz
-from portfolio.models import Holding, Transaction, DepositAndWithdrawal
+from portfolio.models import Holding, Transaction, DepositAndWithdrawalRecord
 
 
 def get_start_n_end(lines: list[str], start_str: str) -> tuple[int, int]:
@@ -70,7 +70,7 @@ def import_deposit_withdraw_data(csv):
     for index, row in df.iterrows():
         dt = datetime.strptime(row['Settle Date'], '%Y-%m-%d')
         dt = pytz.timezone('America/New_York').localize(dt)
-        DepositAndWithdrawal.objects.create(
+        DepositAndWithdrawalRecord.objects.create(
             user=user, 
             amount=int(row['Amount']),
             currency=row['Currency'], 

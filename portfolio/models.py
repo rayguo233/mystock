@@ -9,7 +9,7 @@ class ModelWithTime(models.Model):
         abstract = True
 
 class Transaction(ModelWithTime):
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     ticker = models.CharField(max_length=20)
     num_shares = models.IntegerField()
     currency = models.CharField(max_length=20)
@@ -21,7 +21,14 @@ class Transaction(ModelWithTime):
         unique_together = ['user', 'transaction_time']
 
 
-class DepositAndWithdrawal(ModelWithTime):
+class SplitTransaction(ModelWithTime):
+    from_transaction = models.ForeignKey(Transaction, 
+        on_delete=models.CASCADE)
+    to_user = models.ForeignKey(User, on_delete=models.CASCADE)
+    num_shares_transferred = models.IntegerField()
+
+
+class DepositAndWithdrawalRecord(ModelWithTime):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     currency = models.CharField(max_length=20)
     amount = models.DecimalField(max_digits=20, decimal_places=6)
