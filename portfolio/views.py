@@ -1,18 +1,19 @@
 import copy
 from decimal import Decimal
+from secrets import FINNHUB_API_KEY
 from django.http.response import JsonResponse
 from django.db import transaction
 from django.db.models import F
-import finnhub
-from portfolio.serializers import TransactionSerializer, HoldingSerializer, SplitTransactionSerializer
-from portfolio.models import DepositAndWithdrawalRecord, SplitTransaction, Transaction, Holding
 from rest_framework import status
 from rest_framework import permissions
 from rest_framework import viewsets
-from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from secrets import FINNHUB_API_KEY
+import finnhub
+from portfolio.serializers import TransactionSerializer, \
+    HoldingSerializer, SplitTransactionSerializer
+from portfolio.models import DepositAndWithdrawalRecord, \
+    SplitTransaction, Transaction, Holding
 
 
 class TransactionViewSet(viewsets.ModelViewSet):

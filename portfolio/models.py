@@ -24,6 +24,8 @@ class Transaction(ModelWithTime):
 class SplitTransaction(ModelWithTime):
     from_transaction = models.ForeignKey(Transaction, 
         on_delete=models.CASCADE)
+    to_transaction = models.ForeignKey(Transaction, 
+        on_delete=models.CASCADE)  
     to_user = models.ForeignKey(User, on_delete=models.CASCADE)
     num_shares_transferred = models.IntegerField()
 

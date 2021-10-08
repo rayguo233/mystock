@@ -27,7 +27,7 @@ class SplitTransactionSerializer(serializers.Serializer):
     
     class Meta:
         model = SplitTransaction
-        fields = '__all__'
+        exclude = ['to_transaction']
     
     def validate(self, data):
         if data['num_shares_transferred'] < 1:
@@ -35,7 +35,7 @@ class SplitTransactionSerializer(serializers.Serializer):
                 "Field 'num_shares_transferred' must be greater "
                 "than 0.")
         if data['num_shares_transferred'] > Transaction.objects.get(
-            pk=data['from_transaction_id']).num_shares:
+        pk=data['from_transaction_id']).num_shares:
             raise serializers.ValidationError("Field "
                 "'num_shares_transferred' must be smaller than "
                 "'num_shares' of the source transaction.")
