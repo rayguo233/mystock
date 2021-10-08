@@ -8,3 +8,4 @@ prod_settings.py
 raw_data
 try.py
 secrets.py
+pylintrc
